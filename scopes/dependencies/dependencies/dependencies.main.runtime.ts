@@ -10,6 +10,8 @@ import { BitId } from '@teambit/legacy-bit-id';
 import WorkspaceAspect, { OutsideWorkspaceError, Workspace } from '@teambit/workspace';
 import { cloneDeep, compact, set } from 'lodash';
 import pMapSeries from 'p-map-series';
+import { buildDependenciesHierarchy } from '@pnpm/reviewing.dependencies-hierarchy';
+import { createPackagesSearcher } from '@pnpm/list/createPackagesSearcher';
 import {
   DependencyResolver,
   updateDependenciesVersions,
@@ -256,20 +258,30 @@ export class DependenciesMain {
    * @param depName either component-id-string or package-name (of the component or not component)
    * @returns a map of component-id-string to the version of the dependency
    */
-  async usage(depName: string): Promise<{ [compIdStr: string]: string }> {
-    const [name, version] = this.splitPkgToNameAndVer(depName);
-    const allComps = await this.workspace.list();
-    const results = {};
-    await Promise.all(
-      allComps.map(async (comp) => {
-        const depList = await this.dependencyResolver.getDependencies(comp);
-        const dependency = depList.findByPkgNameOrCompId(name, version);
-        if (dependency) {
-          results[comp.id.toString()] = dependency.version;
-        }
+  async usage(depName: string): Promise<any> {
+    const search = createPackagesSearcher([depName]);
+    return await Promise.all(
+      Object.entries(
+        await buildDependenciesHierarchy(undefined, {
+          depth: Infinity,
+          include: {
+            dependencies: true,
+            devDependencies: true,
+            optionalDependencies: true,
+          },
+          lockfileDir: this.workspace.path,
+          registries: {
+            default: 'https://registry.npmjs.org',
+          },
+          search,
+        })
+      ).map(async ([projectPath, builtDependenciesHierarchy]) => {
+        return {
+          path: projectPath,
+          ...builtDependenciesHierarchy,
+        };
       })
     );
-    return results;
   }
 
   private async getPackageNameAndVerResolved(pkg: string): Promise<[string, string]> {

@@ -7,6 +7,8 @@ settings:
 overrides:
   '@types/fs-capacitor': 2.0.0
   signal-exit@4: ^4.0.2
+  '@pnpm/reviewing.dependencies-hierarchy': link:../../pnpm/pnpm/reviewing/dependencies-hierarchy
+  '@pnpm/list': link:../../pnpm/pnpm/reviewing/list
 
 importers:
 
@@ -43445,7 +43447,7 @@ packages:
     resolution: {integrity: sha512-n8oxjeb5aIbPFEtmQxQYOLI0i9n5ySBEY/ZEHHZqKQSFnxio1rv6dthascc9dLuwrL0RC5mPCxB7vnAVGAYWAQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
-      eslint: '*'
+      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@7.32.0)
       '@types/json-schema': 7.0.12

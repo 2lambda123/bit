@@ -7,6 +7,7 @@ import { generateDependenciesInfoTable } from '@teambit/legacy/dist/cli/template
 import { IdNotFoundInGraph } from '@teambit/legacy/dist/scope/exceptions/id-not-found-in-graph';
 import DependencyGraph from '@teambit/legacy/dist/scope/graph/scope-graph';
 import { COMPONENT_PATTERN_HELP } from '@teambit/legacy/dist/constants';
+import { renderTree } from '@pnpm/list';
 import { DependenciesMain } from './dependencies.main.runtime';
 
 type GetDependenciesFlags = {
@@ -300,9 +301,13 @@ export class DependenciesUsageCmd implements Command {
     if (!Object.keys(results).length) {
       return chalk.yellow(`the specified dependency ${depName} is not used by any component`);
     }
-    return Object.keys(results)
-      .map((compIdStr) => `${chalk.bold(compIdStr)} (using dep in version ${results[compIdStr]})`)
-      .join('\n');
+    return renderTree(results, {
+      alwaysPrintRootPackage: false,
+      depth: Infinity,
+      search: true,
+      long: false,
+      showExtraneous: false,
+    });
   }
 }
 
